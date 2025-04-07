@@ -1,0 +1,235 @@
+=pod
+
+=head1 NAME
+
+PkgDiff - A package for comparing package lists between two linux hosts
+
+=head1 SYNOPSIS
+
+    use PkgDiff;
+    use PkgDiff::PkgMgr;
+    use PkgDiff::Differ;
+
+    # Create PkgDiff objects for two hosts
+    my $host1 = PkgDiff->new(
+        hostname        => 'host1.example.com',
+        port            => 22,
+        user            => 'username',
+        pkgmgr          => 'yum',
+        identity_files  => ['/path/to/id_rsa']
+    );
+
+    my $host2 = PkgDiff->new(
+        hostname        => 'host2.example.com',
+        port            => 22,
+        user            => 'username',
+        pkgmgr          => 'apt',
+        identity_files  => ['/path/to/id_rsa']
+    );
+
+    # Test SSH connections
+    $host1->test_ssh_connection();
+    $host2->test_ssh_connection();
+
+    # Get package lists
+    $host1->get_pkgs();
+    $host2->get_pkgs();
+
+    # Create a Differ object and compare packages
+    my $differ = PkgDiff::Differ->new(
+        host1   => $host1,
+        host2   => $host2,
+        filters => ['kernel', 'bash']
+    );
+
+    $differ->diff();
+
+=head1 DESCRIPTION
+
+PkgDiff is a Perl module designed to compare package lists between two hosts. It uses SSH to connect to the hosts and retrieve package information using the specified package manager.
+
+The module consists of three main classes:
+
+=over 4
+
+=item * L<PkgDiff>
+
+The main class that handles the connection to a host and retrieves package information.
+
+=item * L<PkgDiff::PkgMgr>
+
+A helper class that interacts with different package managers to retrieve package lists.
+
+=item * L<PkgDiff::Differ>
+
+A class that compares package lists between two hosts and displays the differences.
+
+=back
+
+=head1 CLASSES
+
+=head2 PkgDiff
+
+=over 4
+
+=item new(%cnf)
+
+Constructor for PkgDiff objects. Takes a hash of configuration options:
+
+=over 4
+
+=item hostname
+
+The hostname or IP address of the target host.
+
+=item port
+
+The SSH port to use (default: 22).
+
+=item user
+
+The username to use for SSH connection.
+
+=item pkgmgr
+
+The package manager to use (e.g., 'yum', 'apt', 'dnf', etc.).
+
+=item ssh_opts
+
+Additional SSH options.
+
+=item identity_files
+
+An array reference of paths to SSH identity files.
+
+=back
+
+=item print_self()
+
+Prints the internal state of the object using Data::Dumper.
+
+=item connection_success()
+
+Returns a boolean indicating whether the SSH connection was successful.
+
+=item has_errors()
+
+Returns a boolean indicating whether there are any errors.
+
+=item get_errors()
+
+Returns an array reference of error messages.
+
+=item test_ssh_connection()
+
+Tests the SSH connection to the host and returns a boolean indicating success.
+
+=item get_pkgs()
+
+Retrieves the package list from the host using the specified package manager.
+
+=back
+
+=head2 PkgDiff::PkgMgr
+
+=over 4
+
+=item new(%cnf)
+
+Constructor for PkgDiff::PkgMgr objects. Takes a hash of configuration options:
+
+=over 4
+
+=item pkgmgr
+
+The package manager to use (e.g., 'yum', 'apt', 'dnf', etc.).
+
+=item ssh_obj
+
+The Net::SSH::Perl object to use for SSH connections.
+
+=item user
+
+The username to use for SSH connection.
+
+=back
+
+=item get_pkgs()
+
+Retrieves the package list using the appropriate command for the specified package manager.
+
+=item has_errors()
+
+Returns a boolean indicating whether there are any errors.
+
+=item get_errors()
+
+Returns an array reference of error messages.
+
+=item get_pkgs_rpm()
+
+Retrieves the package list for RPM-based systems.
+
+=item get_pkgs_dpkg()
+
+Retrieves the package list for Debian-based systems.
+
+=back
+
+=head2 PkgDiff::Differ
+
+=over 4
+
+=item new(%cnf)
+
+Constructor for PkgDiff::Differ objects. Takes a hash of configuration options:
+
+=over 4
+
+=item host1
+
+A PkgDiff object representing the first host.
+
+=item host2
+
+A PkgDiff object representing the second host.
+
+=item filters
+
+An array reference of package name filters to apply during comparison.
+
+=back
+
+=item diff()
+
+Compares the package lists between the two hosts and displays the results.
+
+=item diff_map($pkgs)
+
+Maps the package list to a standardized format and applies filters if specified.
+
+=back
+
+=head1 DEPENDENCIES
+
+=over 4
+
+=item * Net::SSH::Perl
+
+=item * Carp
+
+=item * Data::Dumper
+
+=back
+
+=head1 AUTHOR
+
+Albert J. Mendes <tray.mendes@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2025 by Albert J. Mendes.
+
+This is free software; you can redistribute it and/or modify it under the same terms as the Perl 5 programming language system itself.
+
+=cut
